@@ -1,0 +1,77 @@
+def on_received_value(name, value):
+    basic.show_icon(IconNames.YES)
+    if name == "UP":
+        if value != pot:
+            controller1.control_change(0, Math.floor(abs((value + 1024) / 2048 * 127)))
+    else:
+        if name == "DOWN":
+            controller2.control_change(0, Math.floor(abs((value + 1024) / 2048 * 127)))
+radio.on_received_value(on_received_value)
+
+//% Accept the acceleration value from another micro:bit
+
+controller3: midi.MidiController = None
+midimessage: midi.MidiController = None
+press2 = False
+press1 = False
+pressB = False
+pressA = False
+pot = 0
+controller2: midi.MidiController = None
+controller1: midi.MidiController = None
+radio.set_group(1)
+controller1 = midi.channel(1)
+controller2 = midi.channel(2)
+pot = 0
+basic.show_icon(IconNames.SMALL_HEART)
+midi.use_raw_serial()
+release1 = False
+releaseA = False
+releaseB = False
+release2 = False
+serial.redirect(SerialPin.P0, SerialPin.P0, BaudRate.BAUD_RATE31250)
+
+//%Initialize some values, midi uses serial port transmission, and directs serial port transmission to pin0
+
+def on_forever():
+    global pressA, pressB, press1, press2, midimessage, controller3, releaseA, releaseB, release1, release2
+    pressA = input.button_is_pressed(Button.A)
+    pressB = input.button_is_pressed(Button.B)
+    press1 = input.pin_is_pressed(TouchPin.P1)
+    press2 = input.pin_is_pressed(TouchPin.P2)
+    if pressA and releaseA:
+        midimessage = midi.channel(1)
+        midimessage.note_on(60)
+    else:
+        if releaseA and pressA:
+            midimessage.note_off(60)
+ 
+ //%  Midi note on when key A is pressed, note off when released
+ 
+    if pressB and pressB:
+        midimessage = midi.channel(1)
+        midimessage.note_on(64)
+    else:
+        if pressB and pressB:
+            midimessage.note_off(64)
+    if press1 and release1:
+        midimessage = midi.channel(1)
+        midimessage.note_on(67)
+    else:
+        if release1 and press1:
+            midimessage.note_off(67)
+    if press2 and release2:
+        controller3 = midi.channel(3)
+        controller3.control_change(0, Math.map(input.light_level(), 0, 255, 0, 127))
+    else:
+        if release2 and press2:
+            controller3.control_change(0, 0)
+            
+//%  Use light sensor for midi control when button 2 is pressed, and stop when released.            
+            
+    releaseA = pressA
+    releaseB = pressB
+    release1 = press1
+    release2 = press2
+    basic.pause(100)
+basic.forever(on_forever)
