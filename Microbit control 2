@@ -1,0 +1,24 @@
+pressB = False
+pressA = False
+radio.set_group(1)
+basic.show_icon(IconNames.HEART)
+releaseA = False
+releaseB = False
+//%   Initialize some values and set the wireless settings in the same group as the first micro:bit.
+
+def on_forever():
+    global pressA, pressB, releaseB, releaseA
+    pressA = input.button_is_pressed(Button.A)
+    pressB = input.button_is_pressed(Button.B)
+    if pressA and releaseA:
+        radio.send_value("UP", input.acceleration(Dimension.Y))
+        
+ //%  Data is only transmitted when the button is pressed, preventing the sensors from transmitting at the same time, causing trouble to the control
+ 
+ 
+    if pressB and releaseB:
+        radio.send_value("DOWN", input.acceleration(Dimension.X))
+    releaseB = pressB
+    releaseA = pressA
+    basic.pause(100)
+basic.forever(on_forever)
